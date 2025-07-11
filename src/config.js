@@ -1,5 +1,11 @@
 const config = {
-    API_BASE: "http://localhost:3000",
-  };
-  
-  export default config;
+  REACT_APP_FIREBASE_API_KEY:"AIzaSyB1wnqeETUcO8ksW8ahDtgpeY7pr9peh5s",
+  REACT_APP_FIREBASE_AUTH_DOMAIN:"passop - 2ee71.firebaseapp.com",
+  REACT_APP_FIREBASE_PROJECT_ID:"passop - 2ee71",
+  REACT_APP_FIREBASE_STORAGE_BUCKET:"passop - 2ee71.appspot.com",
+  REACT_APP_FIREBASE_MESSAGING_SENDER_ID:"243225713599",
+  REACT_APP_FIREBASE_APP_ID:"1: 243225713599: web: eefc143992c8b5d7f31f0a",
+  REACT_APP_FIREBASE_MEASUREMENT_ID:"G - DVGGQL1T1M"
+};
+
+export default config;

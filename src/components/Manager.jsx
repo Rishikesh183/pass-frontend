@@ -28,13 +28,11 @@ const Manager = () => {
   }, []);
 
   const savePassword = async () => {
-    console.log("save password called");
     if (form.site && form.username && form.password) {
       try {
         await addDoc(collection(db, 'passwords'), form);
         toast.success('Password saved!', { duration: 2000, position: 'top-center' });
         setForm({ site: '', username: '', password: '' });
-        console.log("password saved");
         getPassword(); 
       } catch (err) {
         console.error('Error saving password:', err);
