@@ -4,7 +4,6 @@ import { Button } from './ui/button';
 import { Eye, EyeOff, Save, Copy, Trash2 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
 
-import config from '../../src/config'
 import { db } from '../firebase.config';
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
 
