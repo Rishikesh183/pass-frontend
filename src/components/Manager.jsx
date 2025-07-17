@@ -1,38 +1,81 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import { React, useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Eye, EyeOff, Save, Copy, Trash2 } from 'lucide-react';
 import { toast, Toaster } from 'react-hot-toast';
-
+import { query, where } from 'firebase/firestore';
 import { db } from '../firebase.config';
 import { collection, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { useUser } from '@clerk/clerk-react';
+import CryptoJS from "crypto-js";
 
 const Manager = () => {
+  const { isSignedIn } = useUser();
+
+  const { user } = useUser();
   const [showPass, setShowPass] = useState(false);
   const [form, setForm] = useState({ site: "", username: "", password: "" });
   const [passwordArray, setPasswordArray] = useState([]);
 
   const getPassword = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, 'passwords'));
-      const passwords = querySnapshot.docs.map(docSnap => ({ ...docSnap.data(), id: docSnap.id }));
+      if (!user) return;
+
+      const passwordsRef = collection(db, 'passwords');
+      const q = query(passwordsRef, where('userId', '==', user.id));
+      const querySnapshot = await getDocs(q);
+
+      const passwords = querySnapshot.docs.map(docSnap => {
+        const data = docSnap.data();
+
+        // Decrypt password
+        const bytes = CryptoJS.AES.decrypt(
+          data.password,
+          import.meta.env.VITE_PASSWORD_SECRET_KEY || "Rishi@183"
+        );
+        const decryptedPassword = bytes.toString(CryptoJS.enc.Utf8);
+
+        return {
+          ...data,
+          password: decryptedPassword, // Replace encrypted with decrypted
+          id: docSnap.id,
+        };
+      });
+
       setPasswordArray(passwords);
     } catch (err) {
       console.error('Error fetching passwords:', err);
     }
   };
 
+
+
   useEffect(() => {
     getPassword();
   }, []);
 
   const savePassword = async () => {
-    if (form.site && form.username && form.password) {
+    if (!isSignedIn) {
+      toast.error('please Register before you save a password ', { duration: 2000, position: 'top-center' });
+    }
+    const { site, username, password } = form;
+    if (site && username && password) {
+      const encryptedPassword = CryptoJS.AES.encrypt(
+        password,
+        import.meta.env.VITE_PASSWORD_SECRET_KEY || "Rishi@183"
+      ).toString();
       try {
-        await addDoc(collection(db, 'passwords'), form);
+        await addDoc(collection(db, 'passwords'), {
+          site,
+          username,
+          password: encryptedPassword,
+          userId: user.id,
+        });
+
         toast.success('Password saved!', { duration: 2000, position: 'top-center' });
         setForm({ site: '', username: '', password: '' });
-        getPassword(); 
+        getPassword();
       } catch (err) {
         console.error('Error saving password:', err);
       }
